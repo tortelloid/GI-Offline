@@ -1,0 +1,282 @@
+{
+  "request":{
+    "/test":{
+      "respond":{
+        "type": "text/html",
+        "content": "<body><h1>TEST</h1></body>"
+      }
+    },
+    "/file":{
+      "respond":{
+        "content": "./config/example.json"
+      }
+    },
+    "/object":{
+      "respond":{
+        "content":{
+          "embedded":{
+            "json": [ "object "]
+          }
+        }
+      }
+    },
+    "/once":{
+      "once":{
+        "respond":{
+          "status": 200,
+          "content": "<body><h1>Once</h1><p>Reload and this page will be gone.</p></body>"
+        }
+      }
+    },
+    "/cycle":{
+      "cycle":[
+        { "respond": "<body><h1>A</h1></body>" },
+        { "respond": "<body><h1>B</h1></body>" },
+        { "respond": "<body><h1>C</h1></body>" }
+      ]
+    },
+    "/pass":{
+      "pass": true,
+      "respond": "<blink>This text won't be seen, pass to server</blink>"
+    },
+    "/sequence":{
+      "count":{
+        "1":{ "respond": "<h1>1</h1>" },
+        "2":{ "respond": "<h1>2</h1>" },
+        "3":{ "respond": "<h1>3</h1>" },
+        "5":{ "respond": "<h1>5</h1>" },
+        "~":{ "pass": true }
+      }
+    },
+    "/count":{
+      "count":{
+        "1": {
+          "respond": {
+            "content": "<body><h1>1</h1><p>You have loaded this page once.</p></body>",
+            "status": 418
+          },
+          "cycle": {}
+        },
+        "2": {
+          "respond": "<body><h1>2</h1><p>You have loaded this page two times.</p></body>",
+          "cycle": {}
+        },
+        "5": {
+          "respond": "<body><h1>5</h1><p>You have loaded this page five times.</p></body>",
+          "cycle": {}
+        },
+        "even": {
+          "cycle-id": "even_count",
+          "cycle":[
+            { "respond": "<body><h1>Even</h1><p>You have loaded this page an even number of times.</p></body>" },
+            { "respond": "<body><h1>even</h1><p>You have loaded this page an even number of times.</p></body>" }
+          ]
+        },
+        "odd":{
+          "cycle-id": "odd_count",
+          "cycle":[
+            { "respond": "<body><h1>Odd</h1><p>You have loaded this page an odd number of times.</p></body>" },
+            { "respond": "<body><h1>odd</h1><p>You have loaded this page an odd number of times.</p></body>" }
+          ]
+        }
+      }
+    },
+    "/set":[
+      {
+        "query": { "flag": "~^(1|true|set)$" },
+        "respond": "<body><h1>Flag set</h1></body>",
+        "set":{ "myflag": "1" }
+      },
+      {
+        "query": { "flag": "~^(0|false|clear)$" },
+        "respond": "<body><h1>Flag cleared</h1></body>",
+        "set":{ "myflag": "0" }
+      },
+      {
+        "query": { "flag": "toggle" },
+        "require": { "myflag": "1" },
+        "set":{ "myflag": "0" },
+        "respond": "<body><h1>Flag cleared (toggle)</h1></body>"
+      },
+      {
+        "query": { "flag": "toggle" },
+        "set":{ "myflag": "1" },
+        "respond": "<body><h1>Flag set (toggle)</h1></body>"
+      },
+      {
+        "respond":{
+          "status": 400,
+          "content": "<body><h1>400 – Bad Request</h1><p>Usage: <code>/set?flag=(0|1|toggle)</code></p></body>"
+        }
+      }
+    ],
+    "/get":{
+      "state":{
+        "variable": "myflag",
+        "1":{ "respond": "<body><h1>The flag is set</h1></body>" },
+        "0":{ "respond": "<body><h1>The flag is cleared</h1></body>" },
+        "~":{ "respond": "<body><h1>The flag is undefined</h1></body>" }
+      }
+    },
+    "/flip":{
+      "random":[
+        { "respond": "<body><h1>Heads</h1></body>" },
+        { "respond": "<body><h1>Tails</h1></body>" }
+      ]
+    },
+    "/unreliable":{
+      "random":[
+        {}, {},
+        {
+          "respond": {
+            "status": 500,
+            "content": "<h1>500 - Random Error</h1>"
+          },
+          "pass": false,
+          "log": "random failure"
+        }
+      ],
+      "pass": true
+    },
+    "/nested":{
+      "cycle":[
+        {
+          "cycle-id": "nested_a",
+          "cycle":[
+            {
+              "once":{
+                "respond": "<body><h1>A1</h1><p>First iteration!</p></body>"
+              },
+              "respond": "<body><h1>A1</h1></body>"
+            },
+            { "respond": "<body><h1>A2</h1></body>" },
+            { "respond": "<body><h1>A3</h1></body>" }
+          ]
+        },
+        {
+          "cycle-id": "nested_b",
+          "cycle":[
+            { "respond": "<body><h1>B1</h1></body>" },
+            { "respond": "<body><h1>B2</h1></body>" },
+            {
+              "random":[
+                { "respond": "<body><h1>B3</h1><p>heads</p></body>" },
+                { "respond": "<body><h1>B3</h1><p>tails</p></body>" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "/google":{
+      "modify":{
+        "host": "www.google.com",
+        "method": "GET",
+        "path": "/",
+        "query":{ "q": "mitmproxy" },
+        "content":{
+          "replace": ""
+        }
+      }
+    },
+    "~^/ba(|.)$":{
+      "respond": "<body><h1>Ba</h1><p>Regex match on path.</p></body>"
+    },
+    "*":{
+      "host":[
+        ".com",
+        "arkku.dev"
+      ]
+    }
+  },
+  "response":{
+    "/nonexistent":{
+      "status": 404,
+      "method": [ "GET", "PATCH" ],
+      "replace":{
+        "status": 200,
+        "content": "./config/example.json",
+        "type": "application/json"
+      }
+    },
+    "/foo.json":{
+      "status": 200,
+      "content":{
+        "foo": "~[Oo]+$",
+        "bar": 42,
+        "array":[ { "id": 1 } ]
+      },
+      "headers":{
+        "Content-Type": "~/json"
+      },
+      "modify":[
+        {
+          "merge":{
+            "mock": "inserted item",
+            "baz": "replaced item",
+            "array":[ { "id": 666, "note": "added element", "foo": false } ],
+            "inserted_array":[]
+          }
+        },
+        {
+          "replace": [ "\\bb(a[rz])", "B\\1" ]
+        },
+        {
+          "delete":{
+            "foo": {},
+            "array":[ { "id": 0 } ]
+          }
+        },
+        {
+          "merge":{
+            "array":{
+              "where": { "foo": true },
+              "merge": { "foo": false, "foo_replaced": true },
+              "forall": false
+            }
+          }
+        },
+        {
+          "merge":{
+            "array":{
+              "where": { "id": 3 },
+              "replace": { "id": 3, "foo": false, "note": "replaced element" },
+              "move": "tail"
+            }
+          }
+        },
+        {
+          "merge":{
+            "array":{
+              "where":{ "id": 666 },
+              "move": "head"
+            }
+          }
+        },
+        {
+          "replace":{
+            "other_array": [
+              { "id": "e", "note": "only element after replace" }
+            ]
+          }
+        }
+        ]
+    },
+    "/pass":{
+      "pass": true
+    },
+    "~":[
+      {
+        "status": 404,
+        "replace":{
+          "content": "<body><h1>404 - Not Found</h1><p>The server responded with 404 error, which was intercepted and replaced with this.</p></body>"
+        }
+      }
+    ],
+    "*":{
+      "host":[
+        ".com"
+      ]
+    }
+  }
+}

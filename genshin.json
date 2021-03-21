@@ -1,0 +1,21 @@
+{
+  "request":{
+    "/query_region_list":{
+      "respond":{
+        "type": "text/html",
+        "content": "./mydata"
+      }
+    },
+    "/query_cur_region":{
+      "respond":{
+        "type": "text/html",
+        "content": "CAESGE5vdCBGb3VuZCB2ZXJzaW9uIGNvbmZpZw=="
+      }
+    },
+    "*":{
+      "host":[
+        ".com"
+      ]
+    }
+  }
+}
